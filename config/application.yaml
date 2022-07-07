@@ -1,0 +1,14 @@
+transactions:
+  raw: '/mnt/industry-gtm/fsi/datasets/card_transactions'
+  fmt: '/FileStore/solution_accelerators/merchcat/labeled_transactions'
+  
+model: 
+  executors: 20
+  path: '/FileStore/solution_accelerators/merchcat/fasttext'
+  name: 'merchcat'
+  train:
+    raw: '/FileStore/solution_accelerators/merchcat/labeled_transactions_train_raw'
+    hex: '/FileStore/solution_accelerators/merchcat/labeled_transactions_train_hex'
+  test:
+    raw: '/FileStore/solution_accelerators/merchcat/labeled_transactions_valid_raw'
+    hex: '/FileStore/solution_accelerators/merchcat/labeled_transactions_valid_hex'

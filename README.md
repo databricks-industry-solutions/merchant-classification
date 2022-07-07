@@ -1,23 +1,24 @@
-# PROJECT NAME
-Standard Project Template for Industry Solutions Projects
+<img src=https://d1r5llqwmkrl74.cloudfront.net/notebooks/fs-lakehouse-logo.png width="600px">
 
-## Project Description
-Short description of project's purpose
+[![DBR](https://img.shields.io/badge/DBR-10.4ML-red?logo=databricks&style=for-the-badge)](https://docs.databricks.com/release-notes/runtime/10.4ml.html)
+[![CLOUD](https://img.shields.io/badge/CLOUD-ALL-blue?logo=googlecloud&style=for-the-badge)](https://cloud.google.com/databricks)
+[![POC](https://img.shields.io/badge/POC-10_days-green?style=for-the-badge)](https://databricks.com/try-databricks)
 
-## Project Support
-Please note that all projects in the /databricks-industry-solutions github account are provided for your exploration only, and are not formally supported by Databricks with Service Level Agreements (SLAs).  They are provided AS-IS and we do not make any guarantees of any kind.  Please do not submit a support ticket relating to any issues arising from the use of these projects.
-
-Any issues discovered through the use of this project should be filed as GitHub Issues on the Repo.  They will be reviewed as time permits, but there are no formal SLAs for support.
+*According to 2020 research from the [Nilson Report](https://nilsonreport.com/), roughly 1 billion card transactions occur every day around the world (100 million transactions in the US alone). That is 1 billion data points that can be exploited every day by retail banks and payment processor companies to better understand customers spending behaviours, improve customer experience through their mobile banking applications, drive significant cross sell opportunities in the context of customer 360 or leverage these personalized insights to reduce fraud. With many entities involved in the authorization and settlement of a card transaction, the contextual information carried forward from a merchant to a retail bank is complicated, sometimes misleading and requires the use of advanced analytics techniques to extract clear brand and merchant information. In this solution accelerator, we demonstrate how the lakehouse architecture enables banks, open banking aggregators and payment processors to address the core challenge of retail banking: merchant classification.*
 
 
-## Building the Project
-Instructions for how to build the project
+___
+<milos.colic@databricks.com>
 
-## Deploying / Installing the Project
-Instructions for how to deploy the project, or install it
+___
 
-## Releasing the Project
-Instructions for how to release a version of the project
+<img src=https://github.com/databricks-industry-solutions/merchant_classification/blob/master/images/reference_architecture.png width="800px">
 
-## Using the Project
-Simple examples on how to use the project
+___
+
+&copy; 2021 Databricks, Inc. All rights reserved. The source in this notebook is provided subject to the Databricks License [https://databricks.com/db-license-source].  All included or referenced third party libraries are subject to the licenses set forth below.
+
+| library                                               | description             | license    | source                                              |
+|-------------------------------------------------------|-------------------------|------------|-----------------------------------------------------|
+| fasttext                                              | NLP library             | BSD License| https://fasttext.cc/                                   |
+| PyYAML                                 | Reading Yaml files      | MIT        | https://github.com/yaml/pyyaml                      |
