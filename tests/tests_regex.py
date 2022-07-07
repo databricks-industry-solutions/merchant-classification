@@ -16,7 +16,7 @@ class UdfTest(unittest.TestCase):
         return text
 
     def test_regex(self):
-        with open('export.csv', 'r') as f:
+        with open('tests/export.csv', 'r') as f:
             records = f.read().split('\n')
             for record in records:
                 record = record.split(',')
