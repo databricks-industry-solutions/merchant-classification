@@ -363,7 +363,7 @@ display(df[['param', 'value']])
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <img src="https://github.com/databricks-industry-solutions/merchant_classification/blob/master/images/merchcat_hyperopts_1.png" width="800px">
+# MAGIC <img src="https://raw.githubusercontent.com/databricks-industry-solutions/merchant-classification/main/images/merchcat_hyperopts_1.png" width="800px">
 
 # COMMAND ----------
 
@@ -426,7 +426,7 @@ argmin = fmin(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <img src="https://github.com/databricks-industry-solutions/merchant_classification/blob/master/images/merchcat_hyperopts_2.png" width="800px">
+# MAGIC <img src="https://raw.githubusercontent.com/databricks-industry-solutions/merchant-classification/main/images/merchcat_hyperopts_2.png" width="800px">
 
 # COMMAND ----------
 

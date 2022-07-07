@@ -15,7 +15,7 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <img src=https://github.com/databricks-industry-solutions/merchant_classification/blob/master/images/reference_architecture.png width="800px">
+# MAGIC <img src=https://raw.githubusercontent.com/databricks-industry-solutions/merchant-classification/main/images/reference_architecture.png width="800px">
 
 # COMMAND ----------
 
