@@ -6,7 +6,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run ./config/configure_notebook
+# MAGIC %run ./config/merchcat_config
 
 # COMMAND ----------
 
@@ -21,7 +21,7 @@ tr_df = (
     spark
         .read
         .format('delta')
-        .load(config['transactions']['raw'])
+        .load(getParam('transactions_raw'))
         .select('tr_date', 'tr_merchant', 'tr_description', 'tr_amount')
         .filter(F.expr('tr_merchant IS NOT NULL'))
 )
@@ -41,7 +41,7 @@ display(tr_df.select("tr_date", "tr_description", "tr_amount"))
 
 # COMMAND ----------
 
-from utils.regex_utils import *
+# MAGIC %run ./util/merchcat_utils
 
 # COMMAND ----------
 
@@ -106,7 +106,7 @@ _ = (
       .write
       .mode("overwrite")
       .format("delta")
-      .save(config['transactions']['fmt'])
+      .save(getParam("transactions_fasttext"))
 )
 
 # COMMAND ----------
@@ -117,9 +117,8 @@ _ = (
 
 # COMMAND ----------
 
-tr_df = spark.read.format('delta').load(config['transactions']['fmt'])
-df = tr_df.groupBy("tr_merchant").count().orderBy("count").toPandas()
-df.plot.hist(bins=100)
+tr_df = spark.read.format('delta').load(getParam('transactions_fasttext'))
+display(tr_df.groupBy("tr_merchant").count().orderBy("count"))
 
 # COMMAND ----------
 
@@ -156,8 +155,7 @@ def sample_data(sample_size, count_threshold, data):
 # COMMAND ----------
 
 tr_df_sampled = sample_data(5000, 100, tr_df)
-df_sampled = tr_df_sampled.groupBy("tr_merchant").count().orderBy("count").toPandas()
-df_sampled.plot.hist(bins=100)
+display(tr_df_sampled.groupBy("tr_merchant").count().orderBy("count"))
 
 # COMMAND ----------
 
@@ -189,15 +187,13 @@ df.where("class_percentile < 0.9") \
   .write \
   .mode("overwrite") \
   .format("delta") \
-  .save(config['model']['train']['raw'])
-
-# COMMAND ----------
+  .save(getParam('transactions_train_raw'))
 
 df.where("class_percentile >= 0.9") \
   .write \
   .mode("overwrite") \
   .format("delta") \
-  .save(config['model']['test']['raw'])
+  .save(getParam('transactions_valid_raw'))
 
 # COMMAND ----------
 
@@ -207,13 +203,13 @@ df.where("class_percentile >= 0.9") \
 
 # COMMAND ----------
 
-# MAGIC %run ./utils/fasttext_utils
+# MAGIC %run ./util/merchcat_utils
 
 # COMMAND ----------
 
 tf = TrainingFile(
-    dataframe_location=config['model']['train']['raw'],
-    output_location=config['model']['train']['hex'],
+    dataframe_location=getParam('transactions_train_raw'),
+    output_location=getParam('transactions_train_hex'),
     target_column='tr_merchant',
     fasttext_column='fasttext'
 )
@@ -232,15 +228,27 @@ training_file = tf.generate_training_file(
 
 # COMMAND ----------
 
-display(dbutils.fs.ls(config['model']['train']['hex']))
+display(dbutils.fs.ls(getParam('transactions_train_hex')))
 
 # COMMAND ----------
 
-input_dir = '{}/final'.format(config['model']['train']['hex'])
-display(spark.read.format('text').load(input_dir))
+input_dir = '{}/final'.format(
+    getParam('transactions_train_hex')
+)
+
+display(
+  spark
+    .read
+    .format('text')
+    .load(input_dir)
+)
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ### Take away
 # MAGIC In these first sections, we have dedicated a substantial amount of effort in cleaning and standardising our data. The motivation is simple, higher quality data will yield higher quality machine learning. With our `fasttext` training files in place, we can now train our initial model to extract merchant from card transaction narrative
+
+# COMMAND ----------
+
+

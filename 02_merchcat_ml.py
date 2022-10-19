@@ -5,7 +5,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run ./config/configure_notebook
+# MAGIC %run ./config/merchcat_config
 
 # COMMAND ----------
 
@@ -14,14 +14,13 @@
 
 # COMMAND ----------
 
-display(dbutils.fs.ls(config['model']['train']['hex']))
+display(dbutils.fs.ls(getParam('transactions_train_hex')))
 
 # COMMAND ----------
 
 # distributed storage must be mounted and accessible as a file
 # we ensured files were coalesced into only 1 partition so the whole training set can be read as-is
-import re
-training_file = dbutils.fs.ls('{}/final'.format(config['model']['train']['hex']))[0].path
+training_file = dbutils.fs.ls('{}/final'.format(getParam('transactions_train_hex')))[0].path
 training_file = re.sub('dbfs:', '/dbfs', training_file)
 
 # COMMAND ----------
@@ -35,10 +34,10 @@ validation_data = (
   spark
     .read
     .format("delta")
-    .load(config['model']['train']['raw'])
+    .load(getParam('transactions_train_raw'))
     .groupBy('tr_merchant')
     .count()
-    .join(spark.read.format("delta").load(config['model']['test']['raw']), ['tr_merchant'], 'left')
+    .join(spark.read.format("delta").load(getParam('transactions_valid_raw')), ['tr_merchant'], 'left')
     .orderBy('count')
     .withColumnRenamed('count', 'training_records')
 )
@@ -126,14 +125,11 @@ metrics = [
     ["q_95_acc", accuracies.quantile(0.95)]
 ]
 
-import pandas as pd
 display(pd.DataFrame(metrics, columns=['metric', 'value']))
 
 # COMMAND ----------
 
 import pyspark.sql.functions as F
-import pandas as pd
-
 df = pd.DataFrame(accuracies)
 df['pr_merchant'] = df.index
 display(spark.createDataFrame(df[['pr_merchant', 'accuracy']]).orderBy(F.desc('accuracy')))
@@ -151,16 +147,87 @@ display(spark.createDataFrame(df[['pr_merchant', 'accuracy']]).orderBy(F.desc('a
 
 # COMMAND ----------
 
-from utils.merchcat_utils import *
+import mlflow.pyfunc
+import fasttext
+
+class FastTextMLFlowModel(mlflow.pyfunc.PythonModel):
+
+    def __init__(self, params, run_id):
+        self.params = params
+        self.model_file = "{}/{}.bin".format(params["model_location"], run_id)
+        
+    def load_context(self, context):
+        self.model = fasttext.load_model(self.model_file)
+        
+    def clear_context(self):
+        # model cannot be pickled, so disposing it
+        self.model = None
+        
+    def __predict_label(self, desc):
+        import re
+        prediction = self.model.predict(desc)[0][0]
+        prediction = re.sub('__label__', '', prediction)
+        prediction = re.sub('-', ' ', prediction)
+        return prediction
+        
+    def train(self):
+      
+        self.model = fasttext.train_supervised(
+            input=self.params["input"],
+            lr=self.params.get("lr", 0.1),
+            dim=self.params.get("dim", 100),
+            ws=self.params.get("ws", 5),
+            epoch=self.params.get("epoch", 5),
+            minCount=self.params.get("minCount", 1),
+            minCountLabel=self.params.get("minCountLabel", 1),
+            minn=self.params.get("minn", 0),
+            maxn=self.params.get("maxn", 0),
+            neg=self.params.get("neg", 5),
+            wordNgrams=self.params.get("wordNgrams", 5),
+            loss=self.params.get("loss", "softmax"),
+            bucket=self.params.get("bucket", 2000000),
+            thread=self.params.get("thread", 4),
+            lrUpdateRate=self.params.get("lrUpdateRate", 100),
+            t=self.params.get("t", 0.0001),
+            label=self.params.get("label", "__label__"),
+            verbose=self.params.get("verbose", 2)
+        )
+        
+        # we're saving our model manually instead of relying on cloudpickle
+        self.model.save_model(self.model_file)
+  
+    def evaluate(self, input_features, input_targets):
+        import re
+        result = input_targets.to_frame()
+        result.columns = ["target"]
+        result["prediction"] = input_features.apply(lambda x: self.__predict_label(x))
+        result["accuracy"] = result["prediction"] == result["target"]
+        result["accuracy"] = result["accuracy"].apply(lambda x: float(x))
+        accuracies = result.groupby(["target"])["accuracy"].mean()
+        return {
+            "avg__acc": accuracies.mean(),
+            "q_05_acc": accuracies.quantile(0.05),
+            "q_25_acc": accuracies.quantile(0.25),
+            "q_50_acc": accuracies.quantile(0.50),
+            "q_75_acc": accuracies.quantile(0.75),
+            "q_95_acc": accuracies.quantile(0.95)
+        }      
+
+    def predict(self, context, input_data):
+        tmp = input_data
+        if not "input" in input_data.columns:
+            tmp.columns = ["input"]
+        result = tmp['input'].apply(lambda x: self.__predict_label(x))
+        return result
 
 # COMMAND ----------
 
 # As fasttext models cannot be automatically pickled by using cloudpickle, we will be storing the model in /dbfs
 # This distributed storage was mounted to disk to be writable from any executor
-fasttext_home = '/dbfs{}'.format(config['model']['path'])
+fasttext_home = '/dbfs{}'.format(getParam('transactions_model_dir'))
 
 # Create model directory if it does not yet exist
-dbutils.fs.mkdirs(config['model']['path'])
+dbutils.fs.mkdirs(getParam('transactions_model_dir'))
 
 # COMMAND ----------
 
@@ -312,7 +379,7 @@ search_space = {
 
 # COMMAND ----------
 
-spark_trials = SparkTrials(parallelism=config['model']['executors'], spark_session=spark)
+spark_trials = SparkTrials(parallelism=int(getParam('num_executors')), spark_session=spark)
 
 argmin = fmin(
   fn=hyper_train_model,
@@ -363,7 +430,7 @@ display(df[['param', 'value']])
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <img src="https://raw.githubusercontent.com/databricks-industry-solutions/merchant-classification/main/images/merchcat_hyperopts_1.png" width="800px">
+# MAGIC <img src="https://d1r5llqwmkrl74.cloudfront.net/notebooks/fsi/merchcat/images/merchcat_hyperopts_1.png" width="800px">
 
 # COMMAND ----------
 
@@ -378,13 +445,13 @@ display(df[['param', 'value']])
 
 # COMMAND ----------
 
-# MAGIC %run ./utils/fasttext_utils
+# MAGIC %run ./util/merchcat_utils
 
 # COMMAND ----------
 
 tf = TrainingFile(
-    dataframe_location=config['model']['train']['raw'],
-    output_location=config['model']['train']['hex'],
+    dataframe_location=getParam('transactions_train_raw'),
+    output_location=getParam('transactions_train_hex'),
     target_column='tr_merchant',
     fasttext_column='fasttext'
 )
@@ -408,7 +475,7 @@ search_space = {
   'dimensions': hp.quniform('dimensions', 20, 120, 10)
 }
 
-spark_trials = SparkTrials(parallelism=config['model']['executors'], spark_session=spark)
+spark_trials = SparkTrials(parallelism=int(getParam('num_executors')), spark_session=spark)
   
 argmin = fmin(
   fn=hyper_train_model,
@@ -426,7 +493,7 @@ argmin = fmin(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <img src="https://raw.githubusercontent.com/databricks-industry-solutions/merchant-classification/main/images/merchcat_hyperopts_2.png" width="800px">
+# MAGIC <img src="https://d1r5llqwmkrl74.cloudfront.net/notebooks/fsi/merchcat/images/merchcat_hyperopts_2.png" width="800px">
 
 # COMMAND ----------
 
@@ -465,21 +532,21 @@ display(df[['param', 'value']])
 # COMMAND ----------
 
 model_uri = 'runs:/{}/model'.format(best_run_id)
-result = mlflow.register_model(model_uri, config['model']['name'])
+result = mlflow.register_model(model_uri, getParam('model_name'))
 version = result.version
 
 # COMMAND ----------
 
 client = mlflow.tracking.MlflowClient()
 client.transition_model_version_stage(
-    name=config['model']['name'],
+    name=getParam('model_name'),
     version=version,
     stage="Production"
 )
 
 # COMMAND ----------
 
-logged_model = 'models:/{}/production'.format(config['model']['name'])
+logged_model = 'models:/{}/production'.format(getParam('model_name'))
 loaded_model = mlflow.pyfunc.load_model(logged_model)
 
 # COMMAND ----------
