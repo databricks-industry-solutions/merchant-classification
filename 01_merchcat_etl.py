@@ -1,4 +1,9 @@
 # Databricks notebook source
+# MAGIC %md 
+# MAGIC You may find this series of notebooks at https://github.com/databricks-industry-solutions/merchant-classification/tree/web-sync. For more information about this solution accelerator, visit [this blog](https://www.databricks.com/blog/2021/05/10/improving-customer-experience-with-transaction-enrichment.html).
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC # Preprocessing
 # MAGIC 

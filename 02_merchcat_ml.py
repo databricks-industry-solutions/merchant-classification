@@ -1,4 +1,9 @@
 # Databricks notebook source
+# MAGIC %md 
+# MAGIC You may find this series of notebooks at https://github.com/databricks-industry-solutions/merchant-classification/tree/web-sync. For more information about this solution accelerator, visit [this blog](https://www.databricks.com/blog/2021/05/10/improving-customer-experience-with-transaction-enrichment.html).
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC # Learning merchants
 # MAGIC We will start our modelling with Occam's Razor in mind, simplicity is desired. Our first model will only use default parameters of [`fasttext`](https://fasttext.cc/) algorithm with only 5% of the available traing data as introduced in the previous notebook. This model will be our baseline model, and anything additional level of complexity should only improve the performance of our initial model. 
