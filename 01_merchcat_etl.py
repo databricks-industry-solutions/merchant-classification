@@ -47,10 +47,11 @@ from utils.regex_utils import *
 
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
+import pandas as pd
 
-@udf(returnType=T.StringType())
-def dates_udf(description):
-    return str(date_pattern.sub(" ", str(description)))
+@F.pandas_udf("string")
+def dates_udf(col: pd.Series) -> pd.Series:
+  return col.apply(lambda description: str(date_pattern.sub(" ", str(description))))
 
 tr_df_cleaned = (
     tr_df
