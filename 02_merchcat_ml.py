@@ -21,7 +21,7 @@ display(dbutils.fs.ls(config['model']['train']['hex']))
 # distributed storage must be mounted and accessible as a file
 # we ensured files were coalesced into only 1 partition so the whole training set can be read as-is
 import re
-training_file = dbutils.fs.ls('{}/final'.format(config['model']['train']['hex']))[0].path
+training_file = dbutils.fs.ls(f"{config['model']['train']['hex']}/final")[0].path
 training_file = re.sub('dbfs:', '/dbfs', training_file)
 
 # COMMAND ----------
@@ -157,7 +157,7 @@ from utils.merchcat_utils import *
 
 # As fasttext models cannot be automatically pickled by using cloudpickle, we will be storing the model in /dbfs
 # This distributed storage was mounted to disk to be writable from any executor
-fasttext_home = '/dbfs{}'.format(config['model']['path'])
+fasttext_home = f"/dbfs{config['model']['path']}"
 
 # Create model directory if it does not yet exist
 dbutils.fs.mkdirs(config['model']['path'])
@@ -391,7 +391,7 @@ tf = TrainingFile(
 
 file_thresholds = [0.3, 0.25, 0.2, 0.15, 0.10, 0.05]
 training_files = [tf.generate_training_file(sample_rate=t, min_count=50) for t in file_thresholds]
-training_files = ['/dbfs{}'.format(training_file) for training_file in training_files]
+training_files = [f'/dbfs{training_file}' for training_file in training_files]
 
 # COMMAND ----------
 
@@ -464,7 +464,7 @@ display(df[['param', 'value']])
 
 # COMMAND ----------
 
-model_uri = 'runs:/{}/model'.format(best_run_id)
+model_uri = f'runs:/{best_run_id}/model'
 result = mlflow.register_model(model_uri, config['model']['name'])
 version = result.version
 
@@ -479,7 +479,7 @@ client.transition_model_version_stage(
 
 # COMMAND ----------
 
-logged_model = 'models:/{}/production'.format(config['model']['name'])
+logged_model = f"models:/{config['model']['name']}/production"
 loaded_model = mlflow.pyfunc.load_model(logged_model)
 
 # COMMAND ----------
