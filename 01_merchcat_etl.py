@@ -236,7 +236,7 @@ display(dbutils.fs.ls(config['model']['train']['hex']))
 
 # COMMAND ----------
 
-input_dir = '{}/final'.format(config['model']['train']['hex'])
+input_dir = f"{config['model']['train']['hex']}/final"
 display(spark.read.format('text').load(input_dir))
 
 # COMMAND ----------
