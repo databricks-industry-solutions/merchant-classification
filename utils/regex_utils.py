@@ -31,7 +31,7 @@ NUM_DATE = f"""
 DAY = r"""
 (?:
     # search 1st 2nd 3rd etc, or first second third
-    (?:[23]?1st|2{1,2}nd|\d{1,2}th|2?3rd|first|second|third|fourth|fifth|sixth|seventh|eighth|nineth)
+    (?:[23]?1st|2{1,2}nd|\d{1,2}th|2?3rd|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)
     |
     # or just a number
     (?:[0123]?\d)

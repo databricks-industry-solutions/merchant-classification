@@ -37,7 +37,7 @@ display(tr_df.select("tr_date", "tr_description", "tr_amount"))
 
 # MAGIC %md
 # MAGIC ## Merchant narrative
-# MAGIC The first thing we notice is that card transaction narrative are highly unstructured. These descriptions do not follow a global format and will often contain partially purged data. Oftentimes the data will contain dates, amounts, unique identifiers and similar tokens that do not bring any valuable information when it comes to understanding merchant associated to a card transaction. Whith this in mind we have performed data cleansing activities as part of a pre-processor step. Based on kaggle [article](https://www.kaggle.com/edrushton/removing-dates-data-cleaning) for date removal from string data, we have produced a series of simple regular expressions to clean our descriptions from dates and unwanted characters we know do not carry any descriptive value.
+# MAGIC The first thing we notice is that card transaction narrative are highly unstructured. These descriptions do not follow a global format and will often contain partially purged data. Oftentimes the data will contain dates, amounts, unique identifiers and similar tokens that do not bring any valuable information when it comes to understanding merchant associated to a card transaction. With this in mind we have performed data cleansing activities as part of a pre-processor step. Based on kaggle [article](https://www.kaggle.com/edrushton/removing-dates-data-cleaning) for date removal from string data, we have produced a series of simple regular expressions to clean our descriptions from dates and unwanted characters we know do not carry any descriptive value.
 
 # COMMAND ----------
 

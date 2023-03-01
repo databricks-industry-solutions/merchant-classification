@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Learning merchants
-# MAGIC We will start our modelling with Occam's Razor in mind, simplicity is desired. Our first model will only use default parameters of [`fasttext`](https://fasttext.cc/) algorithm with only 5% of the available traing data as introduced in the previous notebook. This model will be our baseline model, and anything additional level of complexity should only improve the performance of our initial model. 
+# MAGIC We will start our modelling with Occam's Razor in mind, simplicity is desired. Our first model will only use default parameters of [`fasttext`](https://fasttext.cc/) algorithm with only 5% of the available training data as introduced in the previous notebook. This model will be our baseline model, and anything additional level of complexity should only improve the performance of our initial model. 
 
 # COMMAND ----------
 
@@ -10,7 +10,7 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC In the previous notebook, we generated a training file compatible with `fasttext` algorithm. We can load the latest file available to date alongside our validation data. Although we stored our files in a distributed location (e.g. dbfs:), storage location that must be mounted as DISK to be read as-is accross executors (more information can be found [here](https://docs.databricks.com/data/data-sources/aws/amazon-s3.html#mount-an-s3-bucket) for AWS and [here](https://docs.databricks.com/data/data-sources/azure/azure-storage.html) for Azure)
+# MAGIC In the previous notebook, we generated a training file compatible with `fasttext` algorithm. We can load the latest file available to date alongside our validation data. Although we stored our files in a distributed location (e.g. dbfs:), storage location that must be mounted as DISK to be read as-is across executors (more information can be found [here](https://docs.databricks.com/data/data-sources/aws/amazon-s3.html#mount-an-s3-bucket) for AWS and [here](https://docs.databricks.com/data/data-sources/azure/azure-storage.html) for Azure)
 
 # COMMAND ----------
 
@@ -213,7 +213,7 @@ with mlflow.start_run(run_name='fasttext-model') as run:
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC We can easily extract some metrics from our python `fasttextMLF.evaluate` function. Since we did not change any parameter, we obviously expect similar metrics as earlier but our engineering approach now allows us to track those metrics accross multiple MLFlow experiments and achieve better accuracy over time.
+# MAGIC We can easily extract some metrics from our python `fasttextMLF.evaluate` function. Since we did not change any parameter, we obviously expect similar metrics as earlier but our engineering approach now allows us to track those metrics across multiple MLFlow experiments and achieve better accuracy over time.
 
 # COMMAND ----------
 
@@ -227,7 +227,7 @@ display(df[['metric', 'value']])
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC With 5% training data sample we have obtained a model with metrics presented above. From these metrics we can conclude that our model (despite a limited amount of data to learn from) was able to learn from at least 25% of merchants with a decent accuracy. Median/average averages are not a desired level and we have at least 50% of merchants we are not able to detect at all. In the next section, we will leverage [hyperopts](http://hyperopt.github.io/hyperopt/) to tune our model with different parameters so that we can verify if changing parameters affects peformance.
+# MAGIC With 5% training data sample we have obtained a model with metrics presented above. From these metrics we can conclude that our model (despite a limited amount of data to learn from) was able to learn from at least 25% of merchants with a decent accuracy. Median/average averages are not a desired level and we have at least 50% of merchants we are not able to detect at all. In the next section, we will leverage [hyperopts](http://hyperopt.github.io/hyperopt/) to tune our model with different parameters so that we can verify if changing parameters affects performance.
 
 # COMMAND ----------
 
@@ -368,7 +368,7 @@ display(df[['param', 'value']])
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Using MLFlow and `pyfunc`, we've been able to train a model that would correctly classify thousands of merchant names hidden behind million of card transaction narratives. However, this approach is based on the assumption that one already has cleaned merchant names to learn from. Although we've manually labelled tousands of card transactions with actual brand information to get started, we recognize the efforts required for such an exercise. The size and quality of labels required will be evaluated in the next section with actual empirical results.
+# MAGIC Using MLFlow and `pyfunc`, we've been able to train a model that would correctly classify thousands of merchant names hidden behind million of card transaction narratives. However, this approach is based on the assumption that one already has cleaned merchant names to learn from. Although we've manually labelled thousands of card transactions with actual brand information to get started, we recognize the efforts required for such an exercise. The size and quality of labels required will be evaluated in the next section with actual empirical results.
 
 # COMMAND ----------
 
@@ -396,7 +396,7 @@ training_files = [f'/dbfs{training_file}' for training_file in training_files]
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC For this exercise we will train 90 models in parrallel. We will use `hp.choice` function that allows us to select one option from a collection of possible sample location in order to provide different training file for different experiments.
+# MAGIC For this exercise we will train 90 models in parallel. We will use `hp.choice` function that allows us to select one option from a collection of possible sample location in order to provide different training file for different experiments.
 
 # COMMAND ----------
 
@@ -460,7 +460,7 @@ display(df[['param', 'value']])
 
 # MAGIC %md
 # MAGIC ## Model inference
-# MAGIC Before we can infer some merchants from our original set of input transactions, let us register our best experiment as our model candidate on MLRegistry. Although our models would need to be reviewed in real life scenario, we make it available as a production artifact, programmatically. Organizations would be able to simply create web-hooks on MLFlow to notify their independant validation units (IVU process) of a new model to review prior to promoting any model to upper end environments.
+# MAGIC Before we can infer some merchants from our original set of input transactions, let us register our best experiment as our model candidate on MLRegistry. Although our models would need to be reviewed in real life scenario, we make it available as a production artifact, programmatically. Organizations would be able to simply create web-hooks on MLFlow to notify their independent validation units (IVU process) of a new model to review prior to promoting any model to upper end environments.
 
 # COMMAND ----------
 
@@ -538,7 +538,7 @@ display(
 
 # MAGIC %md
 # MAGIC ## Conclusion
-# MAGIC In this solution we have focused on merchant classification problem approching it from short document classification angle. For this task we have selected [`fasttext`](https://fasttext.cc/) as model of choice, we have successfuly integrated this model with MLFlow and `hyperopt`. As part of this exercise, we have demonstrated that an organization can start **introducing good quality merchant classification with as little as 50 labeled record per merchant** (five zero only!). This fact unlock a lot of value. 
+# MAGIC In this solution we have focused on merchant classification problem approaching it from short document classification angle. For this task we have selected [`fasttext`](https://fasttext.cc/) as model of choice, we have successfully integrated this model with MLFlow and `hyperopt`. As part of this exercise, we have demonstrated that an organization can start **introducing good quality merchant classification with as little as 50 labeled record per merchant** (five zero only!). This fact unlock a lot of value. 
 
 # COMMAND ----------
 
